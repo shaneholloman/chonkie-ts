@@ -1,5 +1,19 @@
 # @chonkiejs/cloud
 
+## 0.1.0
+
+### Minor Changes
+
+- Add Pipeline client for building and executing pipelines via api.chonkie.ai
+
+  - New `Pipeline` class with fluent API for building pipelines
+  - Support for `chunkWith()`, `refineWith()`, and `processWith()` builder methods
+  - Static methods: `Pipeline.get()`, `Pipeline.list()`, `Pipeline.validate()`
+  - Instance methods: `run()`, `update()`, `delete()`, `reset()`
+  - Auto-save on first `run()` call
+  - File upload support via `filepath` option
+  - Full TypeScript types: `PipelineOptions`, `PipelineStep`, `PipelineValidationResult`
+
 ## 0.0.6
 
 ### Patch Changes

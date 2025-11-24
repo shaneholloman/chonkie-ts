@@ -1,6 +1,6 @@
 {
   "name": "@chonkiejs/cloud",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "Cloud-based chunkers for Chonkie - semantic, neural, and AI-powered text chunking via api.chonkie.ai",
   "license": "MIT",
   "homepage": "https://docs.chonkie.ai",
