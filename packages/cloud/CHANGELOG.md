@@ -1,5 +1,11 @@
 # @chonkiejs/cloud
 
+## 0.0.6
+
+### Patch Changes
+
+- Fix: Add proper `.js` extension to the files
+
 ## 0.0.5
 
 ### Patch Changes

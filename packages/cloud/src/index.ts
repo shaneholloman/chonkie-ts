@@ -39,3 +39,7 @@ export type { EmbeddingsRefineryOptions } from '@/refineries/embeddings';
 
 export { OverlapRefinery } from '@/refineries/overlap';
 export type { OverlapRefineryOptions } from '@/refineries/overlap';
+
+// Pipeline
+export { Pipeline } from '@/pipeline';
+export type { PipelineOptions, PipelineStep, PipelineValidationResult } from '@/pipeline';

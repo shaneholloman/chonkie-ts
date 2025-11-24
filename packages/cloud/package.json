@@ -1,6 +1,6 @@
 {
   "name": "@chonkiejs/cloud",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Cloud-based chunkers for Chonkie - semantic, neural, and AI-powered text chunking via api.chonkie.ai",
   "license": "MIT",
   "homepage": "https://docs.chonkie.ai",
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc && tsc-alias",
+    "build": "npm run clean && tsc && tsc-alias -p tsconfig.json --resolve-full-paths",
     "test": "vitest run"
   },
   "files": [

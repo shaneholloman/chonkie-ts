@@ -1,5 +1,8 @@
 {
   "resolveFullPaths": true,
+  "output": {
+    "fileExtension": ".js"
+  },
   "replacers": {
     "~": {
       "enabled": true
