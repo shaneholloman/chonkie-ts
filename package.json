@@ -12,8 +12,8 @@
   ],
   "scripts": {
     "clean": "rimraf --glob packages/*/dist",
-    "build": "npm run clean && npm run build --workspace=packages/core && npm run build --workspace=packages/cloud",
-    "test": "npm run build && npm run test --workspace=packages/core && npm run test --workspace=packages/cloud",
+    "build": "npm run clean && npm run build --workspace=packages/core",
+    "test": "npm run build && npm run test --workspace=packages/core",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "npm run build && changeset publish"
