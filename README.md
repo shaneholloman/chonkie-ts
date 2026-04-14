@@ -65,9 +65,132 @@ for (const chunk of chunks) {
 
 | Package | Description | Dependencies |
 |---------|-------------|--------------|
-| [@chonkiejs/core](./packages/core) | Local chunking (Recursive, Token) with character-based tokenization | Zero |
+| [@chonkiejs/core](./packages/core) | Local chunking (Recursive, Token, Sentence, Semantic, Code, Table, Fast) with character-based tokenization | Zero |
 | [@chonkiejs/cloud](./packages/cloud) | Cloud-based chunkers (Semantic, Neural, Code, etc.) via api.chonkie.ai | @chonkiejs/core |
 | [@chonkiejs/token](./packages/token) | HuggingFace tokenizer support for core chunkers | @huggingface/transformers |
+
+## Chunkers
+
+All chunkers are available from `@chonkiejs/core` and follow the same pattern: `await ChunkerClass.create(options)` returns an instance, then `await chunker.chunk(text)` returns a `Chunk[]`.
+
+### TokenChunker
+
+Splits text into fixed-size token chunks with optional overlap.
+
+```typescript
+import { TokenChunker } from '@chonkiejs/core';
+
+const chunker = await TokenChunker.create({
+  chunkSize: 512,      // max tokens per chunk (default: 512)
+  chunkOverlap: 50,    // overlapping tokens between chunks (default: 0)
+  tokenizer: 'character', // tokenizer model name or Tokenizer instance (default: 'character')
+});
+const chunks = await chunker.chunk(text);
+```
+
+### RecursiveChunker
+
+Recursively splits text using a hierarchy of rules: paragraphs → sentences → punctuation → words → characters. The most general-purpose chunker.
+
+```typescript
+import { RecursiveChunker } from '@chonkiejs/core';
+
+const chunker = await RecursiveChunker.create({
+  chunkSize: 512,              // max tokens per chunk (default: 512)
+  tokenizer: 'character',      // tokenizer model name or Tokenizer instance (default: 'character')
+  minCharactersPerChunk: 24,   // min characters when merging splits (default: 24)
+  // rules: RecursiveRules,    // custom split hierarchy (optional)
+});
+const chunks = await chunker.chunk(text);
+```
+
+### SentenceChunker
+
+Groups sentences into token-sized chunks, respecting sentence boundaries.
+
+```typescript
+import { SentenceChunker } from '@chonkiejs/core';
+
+const chunker = await SentenceChunker.create({
+  chunkSize: 2048,                         // max tokens per chunk (default: 2048)
+  chunkOverlap: 0,                         // overlapping tokens between chunks (default: 0)
+  minSentencesPerChunk: 1,                 // min sentences per chunk (default: 1)
+  minCharactersPerSentence: 12,            // min chars for a sentence (default: 12)
+  delim: ['. ', '! ', '? ', '\n'],         // sentence boundary delimiters (default)
+  includeDelim: 'prev',                    // attach delimiter to 'prev' | 'next' | 'none' (default: 'prev')
+  tokenizer: 'character',
+});
+const chunks = await chunker.chunk(text);
+```
+
+### SemanticChunker
+
+Detects natural chunk boundaries by computing embedding similarity between sliding sentence windows and splitting at low-similarity valleys.
+
+```typescript
+import { SemanticChunker } from '@chonkiejs/core';
+
+const chunker = await SemanticChunker.create({
+  embeddings: async (texts) => myModel.encode(texts), // required: (texts: string[]) => Promise<number[][]>
+  // or:  embeddings: myModel,  // any object with .embed(texts) method
+  chunkSize: 2048,             // max tokens per chunk (default: 2048)
+  threshold: 0.8,              // similarity threshold for splits; lower = more splits (default: 0.8)
+  similarityWindow: 3,         // sentences per sliding window embedding (default: 3)
+  minSentencesPerChunk: 1,     // min sentences per chunk (default: 1)
+  minCharactersPerSentence: 24,
+  tokenizer: 'character',
+});
+const chunks = await chunker.chunk(text);
+```
+
+### CodeChunker
+
+Splits source code into AST-aware chunks using [tree-sitter](https://tree-sitter.github.io/). Requires `web-tree-sitter` and a language grammar.
+
+```typescript
+import { CodeChunker } from '@chonkiejs/core';
+
+// Using a language id (requires `tree-sitter-wasms` package)
+const chunker = await CodeChunker.create({
+  language: 'javascript',   // language id, .wasm path/URL, or Language instance
+  chunkSize: 2048,
+  tokenizer: 'character',
+});
+const chunks = chunker.chunk(sourceCode); // synchronous after create()
+```
+
+### TableChunker
+
+Splits markdown or HTML tables into smaller sub-tables, each repeating the original header.
+
+```typescript
+import { TableChunker } from '@chonkiejs/core';
+
+// Row mode (default): at most N data rows per chunk
+const chunker = await TableChunker.create({
+  tokenizer: 'row',  // 'row' for row-based, or any tokenizer for token-based (default: 'row')
+  chunkSize: 3,      // max rows per chunk in row mode, max tokens in token mode (default: 3)
+});
+const chunks = chunker.chunk(markdownOrHtmlTable); // synchronous
+```
+
+### FastChunker
+
+High-throughput byte-based chunker powered by WASM. Does not count tokens — suited for pre-processing or when speed matters most.
+
+```typescript
+import { FastChunker } from '@chonkiejs/core';
+
+const chunker = await FastChunker.create({
+  chunkSize: 4096,          // target chunk size in bytes (default: 4096)
+  delimiters: '\n.?',       // boundary characters (default: '\n.?')
+  // pattern: '---',        // multi-byte pattern (overrides delimiters)
+  prefix: false,            // attach delimiter to start of next chunk (default: false)
+  consecutive: false,       // split at start of consecutive delimiter runs (default: false)
+  forwardFallback: false,   // search forward if no boundary found in backward window (default: false)
+});
+const chunks = chunker.chunk(text); // synchronous
+```
 
 ## Contributing
 
